@@ -5,9 +5,9 @@ import sqlite3
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+# from selenium import webdriver
+# from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.service import Service
 
 
 # LangChain
@@ -377,30 +377,35 @@ def get_leads():
 
 
 
+# @app.get("/scrape")
+# def scrape(url: str):
+#     try:
+#         options = Options()
+#         options.add_argument("--headless")
+#         options.add_argument("--disable-gpu")
+
+#         # service = Service("chromedriver.exe")
+#         # driver = webdriver.Chrome(service=service, options=options)
+
+#         driver.get(url)
+
+#         html = driver.page_source
+#         driver.quit()
+
+#         soup = BeautifulSoup(html, "html.parser")
+
+#         text = soup.get_text(" ")
+#         text = " ".join(text.split())
+
+#         if len(text) < 50:
+#             return {"content": "No useful content"}
+
+#         return {"content": text[:2000]}
+
+#     except Exception as e:
+#         return {"content": str(e)}
+
+
 @app.get("/scrape")
 def scrape(url: str):
-    try:
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--disable-gpu")
-
-        service = Service("chromedriver.exe")
-        driver = webdriver.Chrome(service=service, options=options)
-
-        driver.get(url)
-
-        html = driver.page_source
-        driver.quit()
-
-        soup = BeautifulSoup(html, "html.parser")
-
-        text = soup.get_text(" ")
-        text = " ".join(text.split())
-
-        if len(text) < 50:
-            return {"content": "No useful content"}
-
-        return {"content": text[:2000]}
-
-    except Exception as e:
-        return {"content": str(e)}
+    return {"content": "Scraping disabled on server"}
