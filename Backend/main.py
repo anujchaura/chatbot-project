@@ -36,7 +36,7 @@ app.add_middleware(
 # -----------------------------
 # OPENROUTER
 # -----------------------------
-OPENROUTER_API_KEY = "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"
+OPENROUTER_API_KEY = "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"
 
 client = OpenAI(
     api_key=OPENROUTER_API_KEY,
