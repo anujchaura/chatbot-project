@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+openai
+langchain
+langchain-text-splitters
+langchain-community
+langchain-core
+faiss-cpu
+beautifulsoup4
+requests
+selenium
+PyPDF2

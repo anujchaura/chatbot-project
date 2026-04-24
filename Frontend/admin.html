@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Veda Admin</title>
+
+<style>
+:root {
+    --bg-primary: #070a0c;
+    --bg-secondary: #0f1716;
+    --bg-tertiary: #0b1411;
+    --text-primary: #e6f4e9;
+    --text-secondary: #d8f0d7;
+    --text-muted: #a3cbb2;
+    --border-color: rgba(106, 208, 137, 0.12);
+    --button-bg: #63c98b;
+    --button-text: #071509;
+    --header-bg: #07130f;
+    --header-border: #153027;
+    --sidebar-bg: #09120f;
+    --sidebar-border: #183125;
+    --sidebar-hover: #11261e;
+    --sidebar-active-bg: #143527;
+    --sidebar-active-border: #6ad089;
+    --input-bg: #0b1411;
+    --input-border: rgba(106, 208, 137, 0.12);
+    --input-focus: #63c98b;
+}
+
+body.light-mode {
+    --bg-primary: #f8f9f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f2f8f4;
+    --text-primary: #1a3a2e;
+    --text-secondary: #2d5a52;
+    --text-muted: #5a7f78;
+    --border-color: rgba(74, 157, 111, 0.15);
+    --button-bg: #4a9d6f;
+    --button-text: #ffffff;
+    --header-bg: #e8f5f0;
+    --header-border: #c8dcd8;
+    --sidebar-bg: #f2f8f4;
+    --sidebar-border: #d9e5e1;
+    --sidebar-hover: #e1ede8;
+    --sidebar-active-bg: #dde9e4;
+    --sidebar-active-border: #4a9d6f;
+    --input-bg: #f2f8f4;
+    --input-border: rgba(74, 157, 111, 0.15);
+    --input-focus: #4a9d6f;
+}
+
+* {
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body { margin: 0; font-family: Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+
+.header { background: var(--header-bg); color: var(--text-secondary); padding: 18px 20px; letter-spacing: 0.01em; border-bottom: 1px solid var(--header-border); display: flex; align-items: center; justify-content: space-between; }
+
+.theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    box-shadow: 0 2px 8px var(--box-shadow);
+    transition: all 0.2s ease;
+    min-width: 50px;
+    height: 24px;
+}
+
+.theme-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--box-shadow);
+}
+
+.container { display: flex; min-height: 100vh; }
+
+.sidebar { width: 220px; background: var(--sidebar-bg); height: 100vh; border-right: 1px solid var(--sidebar-border); }
+
+.sidebar div { padding: 16px 18px; cursor: pointer; color: var(--text-muted); transition: background 0.2s ease, color 0.2s ease; }
+
+.sidebar div:hover { background: var(--sidebar-hover); }
+
+.sidebar div.active {
+    background: var(--sidebar-active-bg);
+    border-left: 4px solid var(--sidebar-active-border);
+    color: var(--text-secondary);
+}
+
+.main { flex: 1; padding: 24px; }
+
+.box {
+    background: var(--bg-secondary);
+    padding: 22px;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-color);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+th, td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    text-align: left;
+    color: var(--text-secondary);
+}
+
+th { font-weight: 600; }
+
+button {
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+input[type="text"], input[type="url"] {
+    padding: 10px 12px;
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+input[type="text"]:focus, input[type="url"]:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+.msg { margin: 10px 0; }
+.user { text-align: right; }
+.bot { text-align: left; }
+
+.bubble {
+    display: inline-block;
+    padding: 12px 14px;
+    border-radius: 14px;
+    max-width: 70%;
+    line-height: 1.5;
+}
+
+.user .bubble { background: #63c98b; color: #071509; }
+.bot .bubble { background: var(--bg-secondary); color: var(--text-primary); }
+
+#search {
+    margin-bottom: 15px;
+    padding: 10px 12px;
+    width: 220px;
+    border-radius: 10px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+#search:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--sidebar-border);
+        display: flex;
+        overflow-x: auto;
+    }
+    
+    .sidebar div {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    .main {
+        padding: 16px;
+    }
+    
+    .box {
+        padding: 16px;
+    }
+    
+    #search {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 3px 6px;
+        font-size: 11px;
+        min-width: 45px;
+        height: 22px;
+    }
+    
+    .main {
+        padding: 12px;
+    }
+    
+    table {
+        font-size: 14px;
+    }
+    
+    th, td {
+        padding: 10px 8px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <span>Veda Admin</span>
+</div>
+
+<button class="theme-toggle" onclick="toggleTheme()">Dark</button>
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="active" onclick="showSection('chat')">Analytics & Chats</div>
+        <div onclick="showSection('lead')">Captured Leads</div>
+        <div onclick="showSection('scrape')">Web Scraping</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+        <!-- ================= CHAT ================= -->
+        <div id="chatSection">
+
+            <h2>Chat Sessions</h2>
+
+            <div style="display:flex; gap:20px;">
+
+                <!-- TABLE -->
+                <div class="box" style="flex:1;">
+
+                    <input id="search" placeholder="Search user..." onkeyup="searchUser()">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lead</th>
+                                <th>Messages</th>
+                                <th>Needs Human</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table"></tbody>
+                    </table>
+
+                </div>
+
+                 <!-- ✅ TRANSCRIPT (CORRECT PLACE) -->
+    		<div class="box" id="transcriptBox" style="flex:1; display:none;">
+
+        		<div style="display:flex; justify-content:space-between; align-items:center;">
+            			<h3>Transcript</h3>
+
+            			<button onclick="closeTranscript()" style="
+                			background: var(--button-bg);\n                \t\t\tcolor: var(--button-text);
+                			padding:5px 10px;
+                			border-radius:6px;
+            			">
+                            Close
+                        </button>
+                </div>
+
+                <div id="transcript"></div>
+
+            </div>
+        </div>
+    </div>
+
+        <!-- ================= LEADS ================= -->
+        <div id="leadSection" style="display:none;">
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>Captured Leads</h2>
+                <button onclick="downloadLeads()" style="background: var(--button-bg); color: var(--button-text);">Download Excel</button>
+            </div>
+
+            <div class="box">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadTable"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- ================= SCRAPING ================= -->
+        <div id="scrapeSection" style="display:none;">
+
+            <h2>Website Scraping</h2>
+
+            <div class="box">
+
+                <input id="scrapeUrl" placeholder="Enter website URL">
+
+                <button onclick="scrapeSite()">Scrape</button>
+
+                <div style="margin:16px 0;">
+                    <input id="scrapePdf" type="file" accept="application/pdf" style="display:block; margin-bottom:10px;">
+                    <button onclick="scrapePdfFile()">Scrape PDF</button>
+                </div>
+
+                <div id="scrapeResult" style="margin-top:20px;"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// Theme Toggle
+function toggleTheme() {
+    const themeToggleBtn = document.querySelector('.theme-toggle');
+    if (!themeToggleBtn) {
+        console.error('Theme toggle button not found');
+        return;
+    }
+
+    const isDarkMode = document.body.classList.contains('light-mode');
+    if (isDarkMode) {
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+        themeToggleBtn.textContent = 'Dark';
+    } else {
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+        themeToggleBtn.textContent = 'Light';
+    }
+}
+
+// Load theme on page load
+function initializeTheme() {
+    const themeToggleBtn = document.querySelector('.theme-toggle');
+    if (!themeToggleBtn) {
+        console.error('Theme toggle button not found during initialization');
+        return;
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        themeToggleBtn.textContent = 'Light';
+    } else {
+        themeToggleBtn.textContent = 'Dark';
+    }
+}
+
+// Initialize theme immediately if DOM is ready, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTheme);
+} else {
+    initializeTheme();
+}
+
+function closeTranscript(){
+    document.getElementById("transcriptBox").style.display = "none";
+}
+
+// 🔥 SECTION SWITCH + ACTIVE FIX
+let currentSection = "";
+
+function showSection(section){
+
+    if(currentSection === section) return; // stop duplicate click
+    currentSection = section;
+
+    localStorage.setItem("section", section);
+
+    document.getElementById("chatSection").style.display = "none";
+    document.getElementById("leadSection").style.display = "none";
+    document.getElementById("scrapeSection").style.display = "none";
+
+    if(section === "chat"){
+        document.getElementById("chatSection").style.display = "block";
+        loadData();
+    }
+    else if(section === "lead"){
+        document.getElementById("leadSection").style.display = "block";
+        loadLeads();
+    }
+    else if(section === "scrape"){
+        document.getElementById("scrapeSection").style.display = "block";
+    }
+
+    let items = document.querySelectorAll(".sidebar div");
+    items.forEach(i => i.classList.remove("active"));
+
+    if(section === "chat") items[0].classList.add("active");
+    else if(section === "lead") items[1].classList.add("active");
+    else items[2].classList.add("active");
+}
+
+// 🔥 CHAT DATA
+async function loadData(){
+    let res = await fetch("http://127.0.0.1:9001/admin-data");
+    let data = await res.json();
+
+    let table = document.getElementById("table");
+    table.innerHTML = "";
+
+    data.users.forEach(u => {
+        table.innerHTML += `
+        <tr>
+            <td>${u.name}</td>
+            <td>${u.messages}</td>
+            <td>${u.needs_human ? "Yes" : "No"}</td>
+            <td>
+                <button onclick="viewChat('${u.name}')">View</button>
+                <button onclick="downloadChat('${u.name}')">Download</button>
+            </td>
+        </tr>`;
+    });
+}
+
+// 🔥 VIEW CHAT → SHOW TRANSCRIPT ONLY HERE
+async function viewChat(user){
+
+    let res = await fetch(`http://127.0.0.1:9001/chat-history?user=${user}`);
+    let data = await res.json();
+
+    let box = document.getElementById("transcript");
+    box.innerHTML = "";
+
+    data.chats.forEach(c => {
+        box.innerHTML += `
+        <div class="msg ${c.sender === "bot" ? "bot" : "user"}">
+            <div class="bubble">${c.message}</div>
+        </div>`;
+    });
+
+    // 🔥 SHOW NOW
+    document.getElementById("transcriptBox").style.display = "block";
+}
+
+// 🔥 DOWNLOAD
+function downloadChat(user){
+    window.open(`http://127.0.0.1:9001/download-chat?user=${user}`);
+}
+
+// 🔥 SEARCH
+function searchUser(){
+    let input = document.getElementById("search").value.toLowerCase();
+    let rows = document.querySelectorAll("#table tr");
+
+    rows.forEach(row => {
+        let name = row.children[0].innerText.toLowerCase();
+        row.style.display = name.includes(input) ? "" : "none";
+    });
+}
+
+// 🔥 LOAD LEADS
+async function loadLeads(){
+    let res = await fetch("http://127.0.0.1:9001/leads");
+    let data = await res.json();
+
+    let table = document.getElementById("leadTable");
+    table.innerHTML = "";
+
+    data.leads.forEach(l => {
+        table.innerHTML += `
+        <tr>
+            <td>${l.name}</td>
+            <td>${l.email}</td>
+            <td>${l.phone || "-"}</td>
+        </tr>`;
+    });
+}
+
+function downloadLeads(){
+    window.open("http://127.0.0.1:9001/download-leads");
+}
+
+// 🔥 SCRAPE
+async function scrapeSite(){
+    let url = document.getElementById("scrapeUrl").value;
+
+    if(!url){
+        alert("Enter URL");
+        return;
+    }
+
+    let res = await fetch(`http://127.0.0.1:9001/scrape?url=${encodeURIComponent(url)}`);
+    let data = await res.json();
+
+    document.getElementById("scrapeResult").innerText = data.content || "No data";
+}
+
+// INIT
+let saved = localStorage.getItem("section") || "chat";
+showSection(saved);
+
+</script>
+</body>
+</html>

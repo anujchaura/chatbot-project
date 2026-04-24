@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat Bot</title>
+
+<style>
+:root {
+    --bg-primary: #050707;
+    --bg-secondary: #111715;
+    --bg-tertiary: #0f1511;
+    --bg-form: rgba(20, 35, 27, 0.9);
+    --text-primary: #e6f4e9;
+    --text-secondary: #bcd8bc;
+    --text-muted: #8fb99a;
+    --border-color: #2c3b33;
+    --button-bg: #63c98b;
+    --button-text: #071509;
+    --header-bg: #1c2b22;
+    --box-shadow: rgba(0, 0, 0, 0.35);
+    --input-bg: #0f1511;
+    --input-border: #2c3b33;
+    --input-focus: #63c98b;
+    --message-user-bg: linear-gradient(135deg, #63c98b, #2f4f35);
+    --message-bot-bg: #111715;
+}
+
+body.light-mode {
+    --bg-primary: #f8f9f7;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f2f8f4;
+    --bg-form: rgba(245, 252, 248, 0.95);
+    --text-primary: #1a3a2e;
+    --text-secondary: #2d5a52;
+    --text-muted: #5a7f78;
+    --border-color: #c8dcd8;
+    --button-bg: #4a9d6f;
+    --button-text: #ffffff;
+    --header-bg: #e8f5f0;
+    --box-shadow: rgba(74, 157, 111, 0.15);
+    --input-bg: #f2f8f4;
+    --input-border: #c8dcd8;
+    --input-focus: #4a9d6f;
+    --message-user-bg: linear-gradient(135deg, #4a9d6f, #2d5a52);
+    --message-bot-bg: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    #container {
+        width: 95vw !important;
+        max-width: 360px;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        right: auto !important;
+    }
+    
+    #chat-btn {
+        bottom: 15px;
+        right: 15px;
+        min-width: 80px;
+        height: 45px;
+        font-size: 14px;
+    }
+    
+    #theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 3px 6px;
+        font-size: 11px;
+        min-width: 45px;
+        height: 22px;
+    }
+    
+    #bg-text {
+        font-size: 28px;
+    }
+    
+    #bg-text span {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 480px) {
+    #container {
+        width: 100vw !important;
+        height: 100vh !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        top: 0 !important;
+        transform: none !important;
+        border-radius: 0 !important;
+    }
+    
+    #header {
+        border-radius: 0 !important;
+    }
+    
+    #chat.active {
+        height: calc(100vh - 80px) !important;
+    }
+}
+
+/* 🔥 BACKGROUND TEXT */
+#bg-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    font-weight: 700;
+    text-align: center;
+    color: rgba(230, 244, 233, 0.08);
+    z-index: 0;
+    pointer-events: none;
+}
+
+#bg-text span {
+    display: block;
+    font-size: 48px;
+    background: linear-gradient(135deg, #75d49d, #2b3a2f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.18;
+}
+
+/* Theme Toggle */
+#theme-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    box-shadow: 0 2px 8px var(--box-shadow);
+    transition: all 0.2s ease;
+    min-width: 50px;
+    height: 24px;
+}
+
+#theme-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--box-shadow);
+}
+
+/* Button */
+#chat-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    min-width: 95px;
+    height: 52px;
+    padding: 0 16px;
+    background: linear-gradient(135deg, #7bdba5, #2f3530);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 20px 40px var(--box-shadow);
+}
+
+/* Container */
+#container {
+    position: fixed;
+    bottom: 100px;
+    right: 20px;
+    width: 360px;
+    max-height: 80vh;
+    background: var(--bg-secondary);
+    border-radius: 28px;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 22px 50px var(--box-shadow);
+    z-index: 10;
+    overflow: hidden;
+}
+
+/* Header */
+#header {
+    position: relative;
+    background: var(--header-bg);
+    color: var(--text-primary);
+    padding: 22px 22px 22px 20px;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 6px 10px;
+}
+
+/* Glass Form */
+#form {
+    padding: 16px;
+    background: var(--bg-form);
+    backdrop-filter: blur(12px);
+}
+
+#form label {
+    display: block;
+    margin: 8px 0 4px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Inputs */
+input {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 4px 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 2px rgba(99, 201, 139, 0.1);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px var(--box-shadow);
+}
+
+/* Animated Text */
+#hero-text {
+    text-align: center;
+    margin-top: 30px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 1s ease forwards;
+}
+
+#hero-text span {
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #86dfaa, #111915);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Chat */
+#chat {
+    display: none;
+    flex-direction: column;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+#chat.active {
+    height: 500px;
+}
+
+/* Responsive chat height */
+@media (max-width: 768px) {
+    #chat.active {
+        height: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    #chat.active {
+        height: calc(100vh - 120px);
+    }
+}
+
+/* Chatbox */
+#chatbox {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: var(--bg-tertiary);
+}
+
+/* Messages */
+.msg {
+    max-width: 75%;
+    padding: 10px 14px;
+    margin: 8px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px var(--box-shadow);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.user {
+    background: var(--message-user-bg);
+    color: white;
+    margin-left: auto;
+    text-align: right;
+}
+
+.bot {
+    background: var(--message-bot-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+/* Typing */
+.typing {
+    font-style: italic;
+    color: var(--text-muted);
+}
+
+/* Input Area */
+#inputArea {
+    display: flex;
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+    position: relative;
+}
+
+#inputArea input {
+    flex: 1;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    padding: 10px 50px 10px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+#inputArea input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+#inputArea button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 32px;
+    height: 32px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    box-shadow: 0 2px 8px var(--box-shadow);
+    transition: transform 0.15s ease;
+}
+
+#inputArea button:hover {
+    transform: translateY(-50%) scale(1.05);
+}
+
+/* Footer */
+#footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔥 BACKGROUND TEXT -->
+<div id="bg-text">
+    Veda for
+    <span>SoftWallet Innovative Technologies</span>
+</div>
+
+<button id="theme-toggle" onclick="toggleTheme()">Dark</button>
+
+<div id="chat-btn" onclick="toggle()">Chat</div>
+
+<div id="container">
+
+    <div id="header">
+        Veda AI 
+        <span id="close" onclick="toggle()">✖</span>
+    </div>
+
+    <div id="form">
+         <!-- NAME -->
+        <label>Name*</label>
+        <input id="name" placeholder="John Doe">
+
+        <!-- EMAIL -->
+        <label>Email*</label>
+        <input id="email" type="email" placeholder="john@example.com">
+
+        <!-- PHONE -->
+        <label>Phone Number (optional)</label>
+        <input 
+            id="phone"
+            type="tel"
+            placeholder="9382838283"
+            maxlength="10"
+            pattern="[0-9]{10}"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10)"
+        >
+
+        <button onclick="startChat()">Start Chat</button>
+
+        <div id="hero-text">
+            Veda for
+            <span>SoftWallet Innovative Technologies</span>
+        </div>
+    </div>
+
+    <div id="chat">
+        <div id="chatbox"></div>
+
+        <div id="inputArea">
+            <input id="msg" placeholder="Type your message..." onkeypress="key(event)">
+            <button onclick="send()">➤</button>
+        </div>
+
+        <div id="footer">Powered by SoftWallet</div>
+    </div>
+
+</div>
+
+<script>
+
+let username = "";
+
+// Theme Toggle
+function toggleTheme() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) {
+        console.error('Theme toggle button not found');
+        return;
+    }
+
+    const isDarkMode = document.body.classList.contains('light-mode');
+    if (isDarkMode) {
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+        themeToggleBtn.textContent = 'Dark';
+    } else {
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+        themeToggleBtn.textContent = 'Light';
+    }
+}
+
+// Load theme on page load
+function initializeTheme() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) {
+        console.error('Theme toggle button not found during initialization');
+        return;
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        themeToggleBtn.textContent = 'Light';
+    } else {
+        themeToggleBtn.textContent = 'Dark';
+    }
+}
+
+// Initialize theme immediately if DOM is ready, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeTheme);
+} else {
+    initializeTheme();
+}
+
+// Toggle
+function toggle(){
+    let box=document.getElementById("container");
+    box.style.display = (box.style.display==="flex")?"none":"flex";
+}
+
+// Start
+function startChat(){
+
+    let name = document.getElementById("name").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let phone = document.getElementById("phone").value.trim();
+
+    // 🔥 VALIDATION
+    if(!name || !email){
+        alert("Please fill Name & Email first");
+        return;
+    }
+
+    // 🔥 EMAIL CHECK (optional but good)
+    let emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailPattern.test(email)){
+        alert("Enter valid email");
+        return;
+    }
+
+    username = name;
+
+    // 🔥 SAVE LEAD (AB YAHAN KARO)
+    fetch("http://127.0.0.1:9001/lead", {
+    	method: "POST",
+    	headers: {
+        	"Content-Type": "application/x-www-form-urlencoded"
+    	},
+    	body: `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}`
+    });
+
+    document.getElementById("form").style.display="none";
+
+    let chat=document.getElementById("chat");
+    chat.style.display="flex";
+    chat.classList.add("active");
+
+    addMessage(`Hello ${username}! How can I help you today?`, "bot");
+}
+
+// Add message
+function addMessage(text,type){
+    let div=document.createElement("div");
+    div.className="msg "+type;
+    div.innerText=text;
+
+    let chatbox=document.getElementById("chatbox");
+    chatbox.appendChild(div);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// Send
+async function send(){
+    let input=document.getElementById("msg");
+    let msg=input.value.trim();
+
+    if(!msg) return;
+
+    addMessage(msg,"user");
+    input.value="";
+
+    // Typing...
+    let typing=document.createElement("div");
+    typing.className="msg bot typing";
+    typing.innerText="Typing...";
+    document.getElementById("chatbox").appendChild(typing);
+
+    try{
+        let res=await fetch("http://127.0.0.1:9001/chat",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:`user_input=${msg}&user=${username}`
+        });
+
+        let data=await res.json();
+
+        typing.remove();
+
+        addMessage(data.response || "No response","bot");
+
+    }catch{
+        typing.remove();
+        addMessage("Server error","bot");
+    }
+}
+
+// Enter
+function key(e){
+    if(e.key==="Enter"){
+        e.preventDefault();
+        send();
+    }
+}
+
+</script>
+
+</body>
+</html>
