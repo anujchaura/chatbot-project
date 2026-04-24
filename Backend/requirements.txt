@@ -12,3 +12,4 @@ selenium
 PyPDF2
 langchain-huggingface
 python-multipart
+sentence-transformers
